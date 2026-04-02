@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Velaris",
-    "slug": "velari-7808a3e3fa10",
+    "slug": "velaris",
     "scheme": "velaris",
     "version": "1.0.0",
     "runtimeVersion": {
@@ -51,6 +51,9 @@
       "eas": {
         "projectId": "433e1ef0-0362-49bc-bd74-7808a3e3fa10"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/433e1ef0-0362-49bc-bd74-7808a3e3fa10"
     }
   }
 }
