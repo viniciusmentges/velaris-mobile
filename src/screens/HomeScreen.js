@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import api, { exchangeStravaCode, activateShoeByUUID } from '../services/api';
+import api, { exchangeStravaCode, activateShoeByUUID, triggerStravaSync } from '../services/api';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
 import * as Linking from 'expo-linking';
@@ -557,11 +557,8 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                     </View>
                     <View style={actS.expandRow}>
                         <Text style={actS.expandLabel}>Tênis usado</Text>
-                        <TouchableOpacity
-                            onPress={() => onAssign(activity)}
-                            disabled={!noShoe}
-                        >
-                            <Text style={[actS.expandValue, noShoe && actS.link]}>
+                        <TouchableOpacity onPress={() => onAssign(activity)}>
+                            <Text style={[actS.expandValue, actS.link]}>
                                 {activity.shoe_nome || '⚠️ Selecionar Tênis'}
                             </Text>
                         </TouchableOpacity>
@@ -603,32 +600,48 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                         <View style={actS.settingItem}>
                             <Text style={actS.settingLabel}>TERRENO</Text>
                             <View style={actS.tagRow}>
-                                {['Road', 'Trail', 'Mixed'].map(t => (
-                                    <TouchableOpacity
-                                        key={t}
-                                        onPress={() => onUpdate(activity.id, { terrain_category: t })}
-                                        style={[actS.tag, activity.terrain_category === t && actS.tagActive]}
-                                    >
-                                        <Text style={[actS.tagText, activity.terrain_category === t && actS.tagTextActive]}>
-                                            {t === 'Road' ? 'ASFALTO' : t === 'Trail' ? 'TRILHA' : 'MISTO'}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                                {/* Esteira: botão fixo, bloqueado */}
+                                {activity.terreno === 'TREADMILL' ? (
+                                    <View style={[actS.tag, actS.tagActive]}>
+                                        <Text style={[actS.tagText, actS.tagTextActive]}>ESTEIRA</Text>
+                                    </View>
+                                ) : (
+                                    /* Ao ar livre: ASFALTO / TRILHA / MISTO — sem ESTEIRA */
+                                    ['Road', 'Trail', 'Mixed'].map(t => (
+                                        <TouchableOpacity
+                                            key={t}
+                                            onPress={() => onUpdate(activity.id, { terrain_category: t })}
+                                            style={[actS.tag, activity.terrain_category === t && actS.tagActive]}
+                                        >
+                                            <Text style={[actS.tagText, activity.terrain_category === t && actS.tagTextActive]}>
+                                                {t === 'Road' ? 'ASFALTO' : t === 'Trail' ? 'TRILHA' : 'MISTO'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))
+                                )}
                             </View>
                         </View>
                         <View style={actS.settingItem}>
                             <Text style={actS.settingLabel}>TEMPERATURA</Text>
                             <View style={actS.tempDisplayRow}>
-                                <Text style={actS.tempValue}>
-                                    {activity.temperatura != null ? `${activity.temperatura.toFixed(1)}°C` : '—'}
-                                </Text>
-                                <Text style={actS.tempSource}>
-                                    {activity.temperature_source === 'measured'
-                                        ? 'sensor Strava'
-                                        : activity.temperature_source === 'estimated'
-                                        ? 'via clima 📡'
-                                        : 'indisponível'}
-                                </Text>
+                                {activity.temperature_source === 'indoor' ? (
+                                    <Text style={[actS.tempSource, { color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }]}>
+                                        Ambiente controlado — não afeta o cálculo
+                                    </Text>
+                                ) : (
+                                    <>
+                                        <Text style={actS.tempValue}>
+                                            {activity.temperatura != null ? `${activity.temperatura.toFixed(1)}°C` : '—'}
+                                        </Text>
+                                        <Text style={actS.tempSource}>
+                                            {activity.temperature_source === 'measured'
+                                                ? 'sensor Strava'
+                                                : activity.temperature_source === 'estimated'
+                                                ? 'via clima 📡'
+                                                : 'indisponível'}
+                                        </Text>
+                                    </>
+                                )}
                             </View>
                         </View>
                     </View>
@@ -1549,6 +1562,7 @@ export default function HomeScreen({ navigation }) {
     const [lastSync, setLastSync] = useState(null);
     const [recentActivities, setRecentActivities] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [userPlan, setUserPlan] = useState('START');
     const [userName, setUserName] = useState('Usuário');
@@ -1607,6 +1621,7 @@ export default function HomeScreen({ navigation }) {
     };
 
     const fetchDashboard = async () => {
+        setFetchError(false);
         try {
             const token = await AsyncStorage.getItem('userToken');
             const response = await api.get('/api/shoes/', {
@@ -1632,6 +1647,7 @@ export default function HomeScreen({ navigation }) {
             }
         } catch (error) {
             console.error('Error fetching dashboard:', error);
+            setFetchError(true);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -1698,6 +1714,16 @@ export default function HomeScreen({ navigation }) {
     const onRefresh = () => {
         setRefreshing(true);
         fetchDashboard();
+    };
+
+    const handleStravaSync = async () => {
+        try {
+            await triggerStravaSync();
+        } catch (error) {
+            console.error('[Sync] Erro ao sincronizar Strava:', error);
+        } finally {
+            fetchDashboard();
+        }
     };
 
     const toggleActive = async (id, currentStatus) => {
@@ -1784,6 +1810,26 @@ export default function HomeScreen({ navigation }) {
         return (
             <View style={{ flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' }}>
                 <ActivityIndicator size="large" color={C.accent} />
+            </View>
+        );
+    }
+
+    if (fetchError) {
+        return (
+            <View style={{ flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+                <Text style={{ fontSize: 40, marginBottom: 16 }}>⚠️</Text>
+                <Text style={{ color: C.white, fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 }}>
+                    Não foi possível carregar
+                </Text>
+                <Text style={{ color: C.white40, fontSize: 14, textAlign: 'center', marginBottom: 32 }}>
+                    Verifique sua conexão e tente novamente.
+                </Text>
+                <TouchableOpacity
+                    onPress={() => { setLoading(true); fetchDashboard(); }}
+                    style={{ backgroundColor: C.accent, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 14 }}
+                >
+                    <Text style={{ color: C.white, fontFamily: 'Inter_700Bold', fontSize: 15 }}>Tentar novamente</Text>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -1931,9 +1977,9 @@ export default function HomeScreen({ navigation }) {
                     lastSync={formatDateCompact(lastSync)}
                     onSync={() => {
                         if (stravaConnected) {
-                            onRefresh(); // Se conectado, atualiza os dados
+                            handleStravaSync();
                         } else {
-                            promptAsync(); // Se não conectado, abre o login
+                            promptAsync();
                         }
                     }}
                     connected={stravaConnected}
