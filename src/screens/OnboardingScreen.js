@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     View,
     Text,
@@ -8,10 +8,13 @@ import {
     Platform,
     ScrollView,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Linking
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
+
+const PRIVACY_POLICY_URL = 'https://api.velarisapp.com.br/privacidade/';
 
 export default function OnboardingScreen({ navigation }) {
     const [nome, setNome] = useState('');
@@ -20,11 +23,17 @@ export default function OnboardingScreen({ navigation }) {
     const [tamanho, setTamanho] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [nascimento, setNascimento] = useState('');
+    const [aceitaTermos, setAceitaTermos] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleSave = async () => {
         if (!nome || !peso || !altura || !tamanho || !whatsapp || !nascimento) {
             Alert.alert('Quase lá!', 'Por favor, preencha todos os campos para uma melhor experiência.');
+            return;
+        }
+
+        if (!aceitaTermos) {
+            Alert.alert('Termos obrigatórios', 'Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.');
             return;
         }
 
@@ -61,6 +70,8 @@ export default function OnboardingScreen({ navigation }) {
         }
     };
 
+    const canSubmit = aceitaTermos && !loading;
+
     return (
         <View style={{ flex: 1, backgroundColor: '#080C14', paddingTop: Platform.OS === 'ios' ? 60 : 40 }}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -92,18 +103,54 @@ export default function OnboardingScreen({ navigation }) {
                             keyboardType="numeric"
                         />
 
+                        {/* Consentimento — obrigatório para prosseguir */}
+                        <TouchableOpacity
+                            onPress={() => setAceitaTermos(!aceitaTermos)}
+                            style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginTop: 8 }}
+                            activeOpacity={0.7}
+                        >
+                            <View style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 6,
+                                borderWidth: 2,
+                                borderColor: aceitaTermos ? '#4D9EFF' : 'rgba(255,255,255,0.25)',
+                                backgroundColor: aceitaTermos ? '#4D9EFF' : 'transparent',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginTop: 1,
+                                flexShrink: 0,
+                            }}>
+                                {aceitaTermos && (
+                                    <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_700Bold', lineHeight: 16 }}>✓</Text>
+                                )}
+                            </View>
+                            <Text style={{ flex: 1, color: 'rgba(255,255,255,0.55)', fontSize: 13, fontFamily: 'Inter_400Regular', lineHeight: 20 }}>
+                                Li e aceito os{' '}
+                                <Text
+                                    style={{ color: '#4D9EFF', textDecorationLine: 'underline' }}
+                                    onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+                                >
+                                    Termos de Uso e Política de Privacidade
+                                </Text>
+                                , incluindo o uso dos meus dados de corrida para calcular o desgaste dos meus tênis.
+                            </Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity
                             onPress={handleSave}
-                            disabled={loading}
+                            disabled={!canSubmit}
                             style={{
-                                backgroundColor: '#4D9EFF',
+                                backgroundColor: canSubmit ? '#4D9EFF' : 'rgba(77,158,255,0.3)',
                                 padding: 18,
                                 borderRadius: 16,
-                                marginTop: 24,
-                                opacity: loading ? 0.7 : 1
+                                marginTop: 16,
                             }}
                         >
-                            {loading ? <ActivityIndicator color="white" /> : <Text style={{ color: '#FFFFFF', textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Começar a Correr</Text>}
+                            {loading
+                                ? <ActivityIndicator color="white" />
+                                : <Text style={{ color: '#FFFFFF', textAlign: 'center', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Começar a Correr</Text>
+                            }
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

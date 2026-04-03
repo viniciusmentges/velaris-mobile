@@ -20,9 +20,7 @@
       "buildNumber": "1",
       "supportsTablet": false,
       "infoPlist": {
-        "NSMotionUsageDescription": "O Velaris usa dados de movimento para calcular o desgaste dos seus tênis.",
-        "NSHealthShareUsageDescription": "O Velaris pode ler dados de saúde para calcular desgaste e recuperação.",
-        "NSLocationWhenInUseUsageDescription": "Localização usada para registrar atividades de corrida."
+        "NSMotionUsageDescription": "O Velaris usa dados de movimento para calcular o desgaste dos seus tênis."
       }
     },
     "android": {
@@ -34,8 +32,7 @@
       },
       "permissions": [
         "android.permission.INTERNET",
-        "android.permission.VIBRATE",
-        "android.permission.RECEIVE_BOOT_COMPLETED"
+        "android.permission.VIBRATE"
       ]
     },
     "plugins": [

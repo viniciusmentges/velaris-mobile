@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
@@ -149,6 +149,43 @@ export default function ProfileScreen({ navigation }) {
                         onChange={(v) => setFormData({ ...formData, tamanho_calcado: v })}
                         keyboardType="numeric"
                     />
+                    <ProfileItem
+                        label="Cidade"
+                        value={editing ? (formData.cidade || '') : (user?.cidade || '--')}
+                        isEditing={editing}
+                        onChange={(v) => setFormData({ ...formData, cidade: v })}
+                        placeholder="Ex: São Paulo"
+                    />
+                </View>
+
+                {/* Consentimento B2B */}
+                <View style={{ backgroundColor: '#0f172a', borderWidth: 1, borderColor: '#1e293b', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                    <Text style={{ color: '#94a3b8', fontWeight: 'bold', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Privacidade</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14, marginBottom: 4 }}>Ofertas personalizadas</Text>
+                            <Text style={{ color: '#64748b', fontSize: 12, lineHeight: 18 }}>
+                                Permite que lojistas parceiros vejam quando seu tênis está chegando ao fim da vida útil e te enviem ofertas via WhatsApp.
+                            </Text>
+                        </View>
+                        <Switch
+                            value={!!formData.aceita_marketing}
+                            onValueChange={async (val) => {
+                                const updated = { ...formData, aceita_marketing: val };
+                                setFormData(updated);
+                                try {
+                                    const token = await AsyncStorage.getItem('userToken');
+                                    await api.patch('/api/perfil/me/', { aceita_marketing: val }, {
+                                        headers: { Authorization: `Token ${token}` }
+                                    });
+                                } catch {
+                                    setFormData({ ...formData, aceita_marketing: !val });
+                                }
+                            }}
+                            trackColor={{ false: '#1e293b', true: '#1d4ed8' }}
+                            thumbColor={formData.aceita_marketing ? '#4D9EFF' : '#475569'}
+                        />
+                    </View>
                 </View>
 
                 <TouchableOpacity
@@ -164,7 +201,7 @@ export default function ProfileScreen({ navigation }) {
 
 import { TextInput, Alert } from 'react-native';
 
-function ProfileItem({ label, value, isEditing, onChange, keyboardType = 'default' }) {
+function ProfileItem({ label, value, isEditing, onChange, keyboardType = 'default', placeholder }) {
     return (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', py: 12, borderBottomWidth: 1, borderBottomColor: '#1e293b', paddingVertical: 12 }}>
             <Text style={{ color: '#94a3b8' }}>{label}</Text>
@@ -173,6 +210,8 @@ function ProfileItem({ label, value, isEditing, onChange, keyboardType = 'defaul
                     value={value}
                     onChangeText={onChange}
                     keyboardType={keyboardType}
+                    placeholder={placeholder}
+                    placeholderTextColor="#475569"
                     style={{ color: 'white', fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: '#4D9EFF', minWidth: 100, textAlign: 'right' }}
                 />
             ) : (
