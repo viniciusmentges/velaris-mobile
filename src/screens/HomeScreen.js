@@ -598,55 +598,60 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                     </View>
 
                     {/* Configurações da Sessão (Analytics) */}
-                    <View style={actS.sessionSettings}>
-                        <View style={actS.settingItem}>
-                            <Text style={actS.settingLabel}>TERRENO</Text>
-                            <View style={actS.tagRow}>
-                                {/* Esteira: botão fixo, bloqueado */}
-                                {activity.terreno === 'TREADMILL' ? (
-                                    <View style={[actS.tag, actS.tagActive]}>
-                                        <Text style={[actS.tagText, actS.tagTextActive]}>ESTEIRA</Text>
-                                    </View>
-                                ) : (
-                                    /* Ao ar livre: ASFALTO / TRILHA / MISTO — sem ESTEIRA */
-                                    ['Road', 'Trail', 'Mixed'].map(t => (
-                                        <TouchableOpacity
-                                            key={t}
-                                            onPress={() => onUpdate(activity.id, { terrain_category: t })}
-                                            style={[actS.tag, activity.terrain_category === t && actS.tagActive]}
-                                        >
-                                            <Text style={[actS.tagText, activity.terrain_category === t && actS.tagTextActive]}>
-                                                {t === 'Road' ? 'ASFALTO' : t === 'Trail' ? 'TRILHA' : 'MISTO'}
+                    {(() => {
+                        const isIndoor = activity.terreno === 'TREADMILL' || activity.temperature_source === 'indoor';
+                        return (
+                        <View style={actS.sessionSettings}>
+                            <View style={actS.settingItem}>
+                                <Text style={actS.settingLabel}>TERRENO</Text>
+                                <View style={actS.tagRow}>
+                                    {isIndoor ? (
+                                        /* Esteira: botão fixo, sem edição */
+                                        <View style={[actS.tag, actS.tagActive]}>
+                                            <Text style={[actS.tagText, actS.tagTextActive]}>ESTEIRA</Text>
+                                        </View>
+                                    ) : (
+                                        /* Ao ar livre: ASFALTO / TRILHA / MISTO — editável */
+                                        ['Road', 'Trail', 'Mixed'].map(t => (
+                                            <TouchableOpacity
+                                                key={t}
+                                                onPress={() => onUpdate(activity.id, { terrain_category: t })}
+                                                style={[actS.tag, activity.terrain_category === t && actS.tagActive]}
+                                            >
+                                                <Text style={[actS.tagText, activity.terrain_category === t && actS.tagTextActive]}>
+                                                    {t === 'Road' ? 'ASFALTO' : t === 'Trail' ? 'TRILHA' : 'MISTO'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    )}
+                                </View>
+                            </View>
+                            <View style={actS.settingItem}>
+                                <Text style={actS.settingLabel}>TEMPERATURA</Text>
+                                <View style={actS.tempDisplayRow}>
+                                    {isIndoor ? (
+                                        <Text style={[actS.tempSource, { color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }]}>
+                                            Indoor / ambiente controlado
+                                        </Text>
+                                    ) : (
+                                        <>
+                                            <Text style={actS.tempValue}>
+                                                {activity.temperatura != null ? `${activity.temperatura.toFixed(1)}°C` : '—'}
                                             </Text>
-                                        </TouchableOpacity>
-                                    ))
-                                )}
+                                            <Text style={actS.tempSource}>
+                                                {activity.temperature_source === 'measured'
+                                                    ? 'sensor Strava'
+                                                    : (activity.temperature_source === 'estimated' || activity.temperature_source === 'open_meteo' || activity.temperature_source === 'weatherapi')
+                                                    ? 'via clima 📡'
+                                                    : 'indisponível'}
+                                            </Text>
+                                        </>
+                                    )}
+                                </View>
                             </View>
                         </View>
-                        <View style={actS.settingItem}>
-                            <Text style={actS.settingLabel}>TEMPERATURA</Text>
-                            <View style={actS.tempDisplayRow}>
-                                {activity.temperature_source === 'indoor' ? (
-                                    <Text style={[actS.tempSource, { color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }]}>
-                                        Ambiente controlado — não afeta o cálculo
-                                    </Text>
-                                ) : (
-                                    <>
-                                        <Text style={actS.tempValue}>
-                                            {activity.temperatura != null ? `${activity.temperatura.toFixed(1)}°C` : '—'}
-                                        </Text>
-                                        <Text style={actS.tempSource}>
-                                            {activity.temperature_source === 'measured'
-                                                ? 'sensor Strava'
-                                                : (activity.temperature_source === 'estimated' || activity.temperature_source === 'open_meteo' || activity.temperature_source === 'weatherapi')
-                                                ? 'via clima 📡'
-                                                : 'indisponível'}
-                                        </Text>
-                                    </>
-                                )}
-                            </View>
-                        </View>
-                    </View>
+                        );
+                    })()}
 
                     {/* Insights Biomecânicos (Premium Edition) */}
                     <View style={actS.insightsBox}>
