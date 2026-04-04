@@ -33,6 +33,14 @@ export const triggerStravaSync = async () => {
     return response.data;
 };
 
+export const disconnectStrava = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    const response = await api.post('/api/strava/disconnect/', {}, {
+        headers: { Authorization: `Token ${token}` }
+    });
+    return response.data;
+};
+
 export const activateShoeByUUID = async (uuid) => {
     const token = await AsyncStorage.getItem('userToken');
     const response = await api.post('/api/shoes/activate_by_uuid/', { uuid }, {

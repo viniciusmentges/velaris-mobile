@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import api, { exchangeStravaCode, activateShoeByUUID, triggerStravaSync } from '../services/api';
+import api, { exchangeStravaCode, activateShoeByUUID, triggerStravaSync, disconnectStrava } from '../services/api';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
 import * as Linking from 'expo-linking';
@@ -1363,7 +1363,7 @@ const menuS = StyleSheet.create({
 });
 
 // ─── 5. STRAVA (compacto) ─────────────────────────────────────
-function StravaCardV2({ lastSync, onSync, connected }) {
+function StravaCardV2({ lastSync, onSync, onDisconnect, connected, syncing }) {
     return (
         <View style={stravaS.card}>
             <View style={stravaS.left}>
@@ -1375,9 +1375,16 @@ function StravaCardV2({ lastSync, onSync, connected }) {
                     <Text style={stravaS.sync}>{connected ? `Sync: ${lastSync} ` : 'Sincronize suas atividades'}</Text>
                 </View>
             </View>
-            <TouchableOpacity style={stravaS.btn} onPress={onSync} activeOpacity={0.8}>
-                <Text style={stravaS.btnText}>{connected ? 'SINCRONIZAR' : 'CONECTAR'}</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity style={stravaS.btn} onPress={onSync} activeOpacity={0.8} disabled={syncing}>
+                    <Text style={stravaS.btnText}>{syncing ? '...' : connected ? 'SINCRONIZAR' : 'CONECTAR'}</Text>
+                </TouchableOpacity>
+                {connected && (
+                    <TouchableOpacity style={[stravaS.btn, { borderColor: 'rgba(239,68,68,0.3)' }]} onPress={onDisconnect} activeOpacity={0.8}>
+                        <Text style={[stravaS.btnText, { color: 'rgba(239,68,68,0.7)' }]}>SAIR</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
         </View>
     );
 }
@@ -1716,14 +1723,46 @@ export default function HomeScreen({ navigation }) {
         fetchDashboard();
     };
 
+    const [syncing, setSyncing] = useState(false);
+
     const handleStravaSync = async () => {
+        setSyncing(true);
         try {
-            await triggerStravaSync();
+            const result = await triggerStravaSync();
+            if (result?.success) {
+                Alert.alert('Sincronização iniciada', 'Seus treinos serão importados em instantes.');
+            } else {
+                Alert.alert('Aviso', result?.message || 'Sincronização já em andamento.');
+            }
         } catch (error) {
-            console.error('[Sync] Erro ao sincronizar Strava:', error);
+            Alert.alert('Erro', 'Não foi possível sincronizar. Verifique sua conexão.');
         } finally {
+            setSyncing(false);
             fetchDashboard();
         }
+    };
+
+    const handleStravaDisconnect = () => {
+        Alert.alert(
+            'Desconectar Strava',
+            'Seus treinos existentes serão mantidos, mas novos treinos não serão importados automaticamente.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Desconectar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await disconnectStrava();
+                            setStravaConnected(false);
+                            Alert.alert('Strava desconectado', 'Você pode reconectar a qualquer momento.');
+                        } catch {
+                            Alert.alert('Erro', 'Não foi possível desconectar. Tente novamente.');
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     const toggleActive = async (id, currentStatus) => {
@@ -1982,7 +2021,9 @@ export default function HomeScreen({ navigation }) {
                             promptAsync();
                         }
                     }}
+                    onDisconnect={handleStravaDisconnect}
                     connected={stravaConnected}
+                    syncing={syncing}
                 />
 
                 {/* 6. COACH */}
