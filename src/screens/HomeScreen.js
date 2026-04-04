@@ -194,6 +194,7 @@ function HeroShoeCardV2({ shoe, onTogglePause, isPaused }) {
     const lifeColor = getLifeColor(shoe.vida_util_percentual);
     const isReady = shoe.descanso_info?.status === 'Pronto para uso' || shoe.descanso_info?.horas <= 0;
     const kmLeft = Math.max(0, (shoe.vida_util_km - shoe.km_total_real).toFixed(0));
+    const isStartPlan = !!shoe.descanso_info?.premium_locked;
 
     return (
         <View style={heroS.card}>
@@ -281,20 +282,18 @@ function HeroShoeCardV2({ shoe, onTogglePause, isPaused }) {
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                         <Text style={{ fontSize: 14 }}>{isReady ? '✅' : '🔋'}</Text>
                         <Text style={[heroS.recoveryText, { color: isReady ? C.green : C.yellow }]}>
-                            {isReady
-                                ? 'Pronto para uso'
-                                : `Recuperando: ${shoe.descanso_info?.percentual}% `}
+                            {isReady ? 'Pronto' : 'Descansando'}
                         </Text>
                     </View>
-                    {!isReady && shoe.descanso_info?.horas > 0 && (
+                    {!isStartPlan && !isReady && shoe.descanso_info?.horas > 0 && (
                         <Text style={{ fontFamily: 'SpacesGrotesk_700Bold', fontSize: 10, color: C.yellow, opacity: 0.8 }}>
                             {shoe.descanso_info?.horas}h restantes
                         </Text>
                     )}
                 </View>
 
-                {/* Barra de Bateria Visual */}
-                {!isReady && (
+                {/* Barra de Bateria Visual — apenas PREMIUM */}
+                {!isStartPlan && !isReady && (
                     <View style={{ flexDirection: 'row', gap: 2, height: 6 }}>
                         {[...Array(10)].map((_, i) => (
                             <View key={i} style={{
@@ -519,7 +518,8 @@ const heroS = StyleSheet.create({
 });
 
 // ─── 3. ÚLTIMO TREINO (colapsável) ───────────────────────────
-function LastActivityV2({ activity, onAssign, onUpdate }) {
+function LastActivityV2({ activity, onAssign, onUpdate, userPlan }) {
+    const isPremium = userPlan === 'PREMIUM';
     const [expanded, setExpanded] = useState(false);
     const dateObj = new Date(activity.data);
     const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
@@ -653,7 +653,8 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                         );
                     })()}
 
-                    {/* Insights Biomecânicos (Premium Edition) */}
+                    {/* Insights Biomecânicos — apenas PREMIUM */}
+                    {isPremium && (
                     <View style={actS.insightsBox}>
                         <View style={actS.insightsHeader}>
                             <Text style={actS.insightsTitle}>IMPACTO BIOMECÂNICO</Text>
@@ -662,7 +663,6 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                                     RISCO: {activity.risco_lesao}%
                                 </Text>
                             </View>
-                            <Text style={actS.insightsBadge}>PREMIUM</Text>
                         </View>
                         {activity.top_insights_data && activity.top_insights_data.length > 0 ? (
                             <View style={actS.insightsList}>
@@ -677,6 +677,7 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                             <Text style={actS.insightsEmpty}>Nenhum fator de risco crítico detectado.</Text>
                         )}
                     </View>
+                    )}
 
                     {/* IMPACTO ESTRUTURAL NO TÊNIS */}
                     <View style={actS.structuralBox}>
@@ -1004,6 +1005,7 @@ function ShoeCardV2({ shoe, onActivate, onNFC, onDelete }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const lifeColor = getLifeColor(shoe.vida_util_percentual);
     const isReady = shoe.descanso_info?.status === 'Pronto para uso' || shoe.descanso_info?.horas <= 0;
+    const isStartPlan = !!shoe.descanso_info?.premium_locked;
 
     return (
         <View style={cardS.card} >
@@ -1064,18 +1066,18 @@ function ShoeCardV2({ shoe, onActivate, onNFC, onDelete }) {
                     <View style={cardS.recoveryGroup}>
                         <Text style={{ fontSize: 12 }}>{isReady ? '✅' : '🔋'}</Text>
                         <Text style={[cardS.recoveryText, { color: isReady ? C.green : C.yellow }]}>
-                            {isReady ? 'Pronto para uso' : `Recuperando: ${shoe.descanso_info?.percentual}% `}
+                            {isReady ? 'Pronto' : 'Descansando'}
                         </Text>
                     </View>
-                    {!isReady && shoe.descanso_info?.horas > 0 && (
+                    {!isStartPlan && !isReady && shoe.descanso_info?.horas > 0 && (
                         <Text style={{ fontFamily: 'SpacesGrotesk_700Bold', fontSize: 9, color: C.yellow, opacity: 0.8 }}>
                             {shoe.descanso_info?.horas}h restantes
                         </Text>
                     )}
                 </View>
 
-                {/* Barra de Bateria Visual (Card Secundário) */}
-                {!isReady && (
+                {/* Barra de Bateria Visual — apenas PREMIUM */}
+                {!isStartPlan && !isReady && (
                     <View style={{ flexDirection: 'row', gap: 2, height: 4, marginBottom: 4 }}>
                         {[...Array(10)].map((_, i) => (
                             <View key={i} style={{
@@ -1449,9 +1451,33 @@ const stravaS = StyleSheet.create({
 // ─── 6. VELARIS COACH (colapsável) ────────────────────────────────
 function ShoeCoachCardV2({ message, onUnlock }) {
     const [expanded, setExpanded] = useState(false);
-    const preview = message.length > 60
-        ? message.slice(0, 60) + '...'
-        : message;
+    const isLocked = message && message.includes('Upgrade');
+
+    if (isLocked) {
+        return (
+            <TouchableOpacity style={coachS.card} activeOpacity={0.8} onPress={onUnlock}>
+                <View style={coachS.header}>
+                    <View style={coachS.iconWrapper}>
+                        <Text style={coachS.iconText}>🔒</Text>
+                    </View>
+                    <View style={coachS.titleGroup}>
+                        <Text style={coachS.label}>VELARIS COACH</Text>
+                        <Text style={coachS.sublabel}>Inteligência Biomecânica</Text>
+                    </View>
+                    <View style={[coachS.aiBadge, { borderColor: 'rgba(255,184,0,0.3)', backgroundColor: 'rgba(255,184,0,0.08)' }]}>
+                        <Text style={[coachS.aiBadgeText, { color: C.yellow }]}>PREMIUM</Text>
+                    </View>
+                </View>
+                <View style={coachS.divider} />
+                <Text style={[coachS.message, { color: C.white40, fontStyle: 'italic' }]}>
+                    Análises biomecânicas personalizadas disponíveis no plano Premium.
+                </Text>
+                <Text style={[coachS.toggle, { color: C.yellow, marginTop: 4 }]}>Toque para desbloquear ▲</Text>
+            </TouchableOpacity>
+        );
+    }
+
+    const preview = message.length > 60 ? message.slice(0, 60) + '...' : message;
 
     return (
         <View style={coachS.card}>
@@ -1978,6 +2004,7 @@ export default function HomeScreen({ navigation }) {
                 {recentActivities.length > 0 ? (
                     <LastActivityV2
                         activity={recentActivities[0]}
+                        userPlan={userPlan}
                         onAssign={(act) => {
                             setSelectedActivity(act);
                             setSelectionVisible(true);
@@ -2037,6 +2064,7 @@ export default function HomeScreen({ navigation }) {
                 <SectionLabel title="Velaris Coach AI" />
                 <ShoeCoachCardV2
                     message={insights}
+                    onUnlock={() => setPricingVisible(true)}
                 />
 
                 <View style={{ height: 120 }} />
