@@ -565,7 +565,9 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                     </View>
                     <View style={actS.expandRow}>
                         <Text style={actS.expandLabel}>Descanso</Text>
-                        <Text style={actS.expandValue}>{activity.descanso_horas.toFixed(1)}h</Text>
+                        <Text style={actS.expandValue}>
+                            {activity.descanso_horas != null ? `${activity.descanso_horas.toFixed(1)}h` : '—'}
+                        </Text>
                     </View>
 
                     {/* Feedback de Amortecimento (Opcional) */}
@@ -636,7 +638,7 @@ function LastActivityV2({ activity, onAssign, onUpdate }) {
                                         <Text style={actS.tempSource}>
                                             {activity.temperature_source === 'measured'
                                                 ? 'sensor Strava'
-                                                : activity.temperature_source === 'estimated'
+                                                : (activity.temperature_source === 'estimated' || activity.temperature_source === 'open_meteo' || activity.temperature_source === 'weatherapi')
                                                 ? 'via clima 📡'
                                                 : 'indisponível'}
                                         </Text>
