@@ -48,3 +48,11 @@ export const activateShoeByUUID = async (uuid) => {
     });
     return response.data;
 };
+
+export const updateExpoPushToken = async (expoPushToken) => {
+    const token = await AsyncStorage.getItem('userToken');
+    const response = await api.patch('/api/perfil/me/', { expo_push_token: expoPushToken }, {
+        headers: { Authorization: `Token ${token}` }
+    });
+    return response.data;
+};

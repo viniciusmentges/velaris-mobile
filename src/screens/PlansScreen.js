@@ -35,7 +35,7 @@ export default function PlansScreen({ navigation }) {
                     </View>
                     <View style={s.divider} />
                     <View style={s.features}>
-                        <Feature label="Garagem Limitada (Máx 2 Tênis)" />
+                        <Feature label="Garagem Limitada (Máx 4 Tênis)" />
                         <Feature label="Desgaste Base (Somente KM Linear)" />
                         <Feature label="Integração Básica com Strava" />
                         <Feature label="Tempo de Descanso (Desativado)" crossed />

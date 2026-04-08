@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import api, { exchangeStravaCode, activateShoeByUUID, triggerStravaSync, disconnectStrava } from '../services/api';
+import api, { exchangeStravaCode, activateShoeByUUID, triggerStravaSync, disconnectStrava, updateExpoPushToken } from '../services/api';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
 import * as Linking from 'expo-linking';
@@ -1697,11 +1697,21 @@ export default function HomeScreen({ navigation }) {
     useEffect(() => {
         fetchDashboard();
 
-        // Solicita Permissão para Notificações
+        // Solicita permissão e registra token de push
         (async () => {
             const { status } = await Notifications.requestPermissionsAsync();
             if (status !== 'granted') {
-                console.log('Permissão de notificação negada');
+                console.log('[Push] Permissão de notificação negada');
+                return;
+            }
+            try {
+                const projectId = '433e1ef0-0362-49bc-bd74-7808a3e3fa10';
+                const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({ projectId });
+                console.log('[Push] EXPO TOKEN:', expoPushToken);
+                await updateExpoPushToken(expoPushToken);
+                console.log('[Push] Token salvo no backend com sucesso');
+            } catch (e) {
+                console.log('[Push] Erro ao registrar token:', e?.message);
             }
         })();
     }, []);

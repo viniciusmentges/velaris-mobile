@@ -1,6 +1,7 @@
 import "./global.css";
 import React from 'react';
 import { StatusBar, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import * as Notifications from 'expo-notifications';
 
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -11,6 +12,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import PlansScreen from './src/screens/PlansScreen';
 import LibraryScreen from './src/screens/LibraryScreen';
+import ActivityFeedbackScreen from './src/screens/ActivityFeedbackScreen';
 
 import {
   useFonts,
@@ -35,7 +37,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function App() {
   console.log('[Velaris] App Iniciando...');
   const [currentRoute, setCurrentRoute] = React.useState('Loading');
-  const [timedOut, setTimedOut] = React.useState(false);
+  const [routeParams, setRouteParams]   = React.useState({});
+  const [timedOut, setTimedOut]         = React.useState(false);
 
   React.useEffect(() => {
     async function checkLogin() {
@@ -89,9 +92,13 @@ export default function App() {
     );
   }
 
-  const navigate = (route) => setCurrentRoute(route);
+  const navigate = (route, params = {}) => {
+    setRouteParams(params);
+    setCurrentRoute(route);
+  };
   const goBack = () => {
-    if (currentRoute === 'AddShoe') navigate('Home');
+    if (currentRoute === 'ActivityFeedback') navigate('Home');
+    else if (currentRoute === 'AddShoe') navigate('Home');
     else if (currentRoute === 'Plans') navigate('Home');
     else if (currentRoute === 'Profile') navigate('Home');
     else if (currentRoute === 'Library') navigate('Home');
@@ -99,18 +106,31 @@ export default function App() {
     else navigate('Welcome');
   };
 
+  // Listener de toque em push notification — intercepta qualquer resposta
+  React.useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const data = response.notification.request.content.data ?? {};
+      console.log('[Push] Notificação tocada:', data);
+      if (data.route === 'activity_feedback' && data.activity_id) {
+        navigate('ActivityFeedback', { activityId: data.activity_id });
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   const renderScreen = () => {
     const nav = { navigate, replace: navigate, goBack };
     switch (currentRoute) {
-      case 'Login': return <LoginScreen navigation={nav} />;
-      case 'Home': return <HomeScreen navigation={nav} />;
-      case 'Profile': return <ProfileScreen navigation={nav} />;
-      case 'Library': return <LibraryScreen navigation={nav} />;
-      case 'AddShoe': return <AddShoeScreen navigation={nav} />;
-      case 'Register': return <RegisterScreen navigation={nav} />;
-      case 'Onboarding': return <OnboardingScreen navigation={nav} />;
-      case 'Plans': return <PlansScreen navigation={nav} />;
-      default: return <WelcomeScreen navigation={nav} />;
+      case 'Login':              return <LoginScreen navigation={nav} />;
+      case 'Home':               return <HomeScreen navigation={nav} />;
+      case 'Profile':            return <ProfileScreen navigation={nav} />;
+      case 'Library':            return <LibraryScreen navigation={nav} />;
+      case 'AddShoe':            return <AddShoeScreen navigation={nav} />;
+      case 'Register':           return <RegisterScreen navigation={nav} />;
+      case 'Onboarding':         return <OnboardingScreen navigation={nav} />;
+      case 'Plans':              return <PlansScreen navigation={nav} />;
+      case 'ActivityFeedback':   return <ActivityFeedbackScreen navigation={nav} route={{ params: routeParams }} />;
+      default:                   return <WelcomeScreen navigation={nav} />;
     }
   };
 
