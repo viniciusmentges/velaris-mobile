@@ -33,6 +33,7 @@ import {
 } from '@expo-google-fonts/dm-sans';
 import { PremiumTabBar } from './src/components/PremiumTabBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { configurePurchases } from './src/services/purchases';
 
 export default function App() {
   console.log('[Velaris] App Iniciando...');
@@ -44,11 +45,17 @@ export default function App() {
     async function checkLogin() {
       try {
         const token = await AsyncStorage.getItem('userToken');
-        if (token) {
-          setCurrentRoute('Home');
-        } else {
+        if (!token) {
           setCurrentRoute('Welcome');
+          return;
         }
+        // Token existe → vai para Home independentemente do RevenueCat
+        setCurrentRoute('Home');
+        // Inicializa RevenueCat em background; qualquer falha é silenciosa
+        try {
+          const userId = await AsyncStorage.getItem('userId');
+          if (userId) configurePurchases(userId).catch(() => {});
+        } catch (_) {}
       } catch (e) {
         setCurrentRoute('Welcome');
       }

@@ -47,7 +47,9 @@
     "extra": {
       "eas": {
         "projectId": "433e1ef0-0362-49bc-bd74-7808a3e3fa10"
-      }
+      },
+      "REVENUECAT_APPLE_KEY": "appl_SUBSTITUA_PELA_SUA_CHAVE",
+      "REVENUECAT_GOOGLE_KEY": "goog_SUBSTITUA_PELA_SUA_CHAVE"
     },
     "updates": {
       "url": "https://u.expo.dev/433e1ef0-0362-49bc-bd74-7808a3e3fa10"

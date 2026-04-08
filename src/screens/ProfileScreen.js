@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Switch, Alert, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
@@ -70,6 +70,37 @@ export default function ProfileScreen({ navigation }) {
     async function handleLogout() {
         await AsyncStorage.removeItem('userToken');
         navigation.replace('Welcome');
+    }
+
+    async function handleDeleteAccount() {
+        Alert.alert(
+            'Excluir conta',
+            'Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita. Todos os seus dados serão removidos permanentemente.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Excluir permanentemente',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setLoading(true);
+                        try {
+                            const token = await AsyncStorage.getItem('userToken');
+                            await api.delete('/api/perfil/delete_account/', {
+                                headers: { Authorization: `Token ${token}` },
+                            });
+                            await AsyncStorage.removeItem('userToken');
+                            navigation.replace('Welcome');
+                        } catch (err) {
+                            setLoading(false);
+                            Alert.alert(
+                                'Erro',
+                                'Não foi possível excluir sua conta. Tente novamente ou entre em contato: suporte@velarisapp.com.br'
+                            );
+                        }
+                    },
+                },
+            ]
+        );
     }
 
     if (loading && !user) {
@@ -190,16 +221,22 @@ export default function ProfileScreen({ navigation }) {
 
                 <TouchableOpacity
                     onPress={handleLogout}
-                    className="bg-red-900/20 border border-red-900/40 p-4 rounded-xl items-center mb-10"
+                    className="bg-red-900/20 border border-red-900/40 p-4 rounded-xl items-center mb-4"
                 >
                     <Text className="text-red-500 font-bold">Sair da Conta</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={handleDeleteAccount}
+                    style={{ padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 40 }}
+                >
+                    <Text style={{ color: '#64748b', fontSize: 13 }}>Excluir minha conta permanentemente</Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     );
 }
 
-import { TextInput, Alert } from 'react-native';
 
 function ProfileItem({ label, value, isEditing, onChange, keyboardType = 'default', placeholder }) {
     return (

@@ -1,5 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View, Text, StyleSheet, TouchableOpacity, ScrollView,
+    Platform, SafeAreaView, ActivityIndicator, Alert,
+} from 'react-native';
+import { getOfferings, purchasePackage, restorePurchases, getCustomerInfo, hasPremium } from '../services/purchases';
+import { ativarPremium } from '../services/api';
 
 const C = {
     bg: '#080C14',
@@ -15,6 +20,85 @@ const C = {
 };
 
 export default function PlansScreen({ navigation }) {
+    const [offering, setOffering]         = useState(null);
+    const [loadingOffer, setLoadingOffer] = useState(true);
+    const [purchasing, setPurchasing]     = useState(false);
+    const [restoring, setRestoring]       = useState(false);
+    const [isPremium, setIsPremium]       = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            // Verifica status atual do usuário
+            const info = await getCustomerInfo();
+            if (hasPremium(info)) {
+                setIsPremium(true);
+            }
+
+            // Carrega offerings
+            const current = await getOfferings();
+            setOffering(current);
+            setLoadingOffer(false);
+        })();
+    }, []);
+
+    const handleSubscribe = async () => {
+        if (!offering) {
+            Alert.alert('Indisponível', 'Não foi possível carregar os planos. Tente novamente.');
+            return;
+        }
+
+        // Usa o primeiro package do offering atual (monthly)
+        const pkg = offering.availablePackages?.[0];
+        if (!pkg) {
+            Alert.alert('Indisponível', 'Nenhum plano disponível no momento.');
+            return;
+        }
+
+        setPurchasing(true);
+        const result = await purchasePackage(pkg);
+        setPurchasing(false);
+
+        if (result.cancelled) return; // usuário cancelou — sem Alert
+
+        if (result.success) {
+            try { await ativarPremium(); } catch (_) {}
+            setIsPremium(true);
+            Alert.alert('🚀 Bem-vindo ao Premium!', 'Sua assinatura está ativa. Aproveite todos os recursos.', [
+                { text: 'OK', onPress: () => navigation.goBack() },
+            ]);
+        } else {
+            // Cobre error !== null e edge case onde SDK não retorna entitlement pós-compra
+            Alert.alert('Erro na compra', result.error ?? 'Não foi possível concluir a compra. Tente novamente.');
+        }
+    };
+
+    const handleRestore = async () => {
+        setRestoring(true);
+        let info = null;
+        try {
+            info = await restorePurchases();
+        } finally {
+            setRestoring(false);
+        }
+
+        // null = falha na chamada (rede, SDK indisponível) — não confundir com "sem compras"
+        if (info === null) {
+            Alert.alert('Erro', 'Não foi possível restaurar as compras. Verifique sua conexão e tente novamente.');
+            return;
+        }
+
+        if (hasPremium(info)) {
+            try { await ativarPremium(); } catch (_) {}
+            setIsPremium(true);
+            Alert.alert('Compras restauradas', 'Seu plano Premium foi reativado.');
+        } else {
+            Alert.alert('Nenhuma compra encontrada', 'Não encontramos uma assinatura ativa associada a este Apple ID / Google Account.');
+        }
+    };
+
+    // Preço dinâmico vindo da loja (obrigatório Apple) ou fallback
+    const priceString = offering?.availablePackages?.[0]?.product?.priceString ?? 'R$ 19,90/mês';
+
     return (
         <SafeAreaView style={s.safe}>
             <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -24,7 +108,9 @@ export default function PlansScreen({ navigation }) {
 
                 <View style={s.header}>
                     <Text style={s.title}>Escolha seu Laboratório</Text>
-                    <Text style={s.subtitle}>Evolua sua performance com dados biomecânicos precisos sobre seu equipamento.</Text>
+                    <Text style={s.subtitle}>
+                        Evolua sua performance com dados biomecânicos precisos sobre seu equipamento.
+                    </Text>
                 </View>
 
                 {/* PLANO START */}
@@ -51,7 +137,10 @@ export default function PlansScreen({ navigation }) {
                     <View style={s.cardHeader}>
                         <View>
                             <Text style={[s.planName, { color: C.accent }]}>PREMIUM</Text>
-                            <Text style={s.planPrice}>R$ 19,90 <Text style={s.planPeriod}>/mês</Text></Text>
+                            {loadingOffer
+                                ? <ActivityIndicator size="small" color={C.accent} style={{ marginTop: 4 }} />
+                                : <Text style={s.planPrice}>{priceString}</Text>
+                            }
                         </View>
                         <Text style={s.icon}>🚀</Text>
                     </View>
@@ -64,14 +153,38 @@ export default function PlansScreen({ navigation }) {
                         <Feature label="Sincronização Avançada Strava" premium />
                     </View>
 
-                    <TouchableOpacity
-                        style={s.subscribeBtn}
-                        activeOpacity={0.8}
-                        onPress={() => alert("Integração de pagamento será adicionada em breve.")}
-                    >
-                        <Text style={s.subscribeText}>Assinar Premium</Text>
-                    </TouchableOpacity>
+                    {isPremium ? (
+                        <View style={s.activeBadge}>
+                            <Text style={s.activeBadgeText}>✓ Plano Premium ativo</Text>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            style={[s.subscribeBtn, (purchasing || loadingOffer) && s.subscribeBtnDisabled]}
+                            activeOpacity={0.8}
+                            onPress={handleSubscribe}
+                            disabled={purchasing || loadingOffer}
+                        >
+                            {purchasing
+                                ? <ActivityIndicator color={C.bg} />
+                                : <Text style={s.subscribeText}>Assinar Premium</Text>
+                            }
+                        </TouchableOpacity>
+                    )}
                 </View>
+
+                {/* RESTAURAR COMPRAS (obrigatório Apple) */}
+                {!isPremium && (
+                    <TouchableOpacity
+                        style={s.restoreBtn}
+                        onPress={handleRestore}
+                        disabled={restoring}
+                    >
+                        {restoring
+                            ? <ActivityIndicator size="small" color={C.white40} />
+                            : <Text style={s.restoreText}>Restaurar compras</Text>
+                        }
+                    </TouchableOpacity>
+                )}
 
             </ScrollView>
         </SafeAreaView>
@@ -175,11 +288,6 @@ const s = StyleSheet.create({
         fontSize: 24,
         color: C.white,
     },
-    planPeriod: {
-        fontFamily: 'Inter_400Regular',
-        fontSize: 14,
-        color: C.white40,
-    },
     icon: {
         fontSize: 32,
     },
@@ -223,9 +331,35 @@ const s = StyleSheet.create({
         alignItems: 'center',
         marginTop: 24,
     },
+    subscribeBtnDisabled: {
+        opacity: 0.5,
+    },
     subscribeText: {
         fontFamily: 'Inter_700Bold',
         fontSize: 16,
         color: C.bg,
-    }
+    },
+    activeBadge: {
+        marginTop: 24,
+        backgroundColor: 'rgba(74,222,128,0.12)',
+        borderWidth: 1,
+        borderColor: 'rgba(74,222,128,0.3)',
+        borderRadius: 12,
+        paddingVertical: 14,
+        alignItems: 'center',
+    },
+    activeBadgeText: {
+        fontFamily: 'Inter_700Bold',
+        fontSize: 14,
+        color: C.green,
+    },
+    restoreBtn: {
+        alignItems: 'center',
+        paddingVertical: 16,
+    },
+    restoreText: {
+        fontFamily: 'Inter_500Medium',
+        fontSize: 13,
+        color: C.white40,
+    },
 });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
+import { configurePurchases } from '../services/purchases';
 
 export default function LoginScreen({ navigation }) {
     const [username, setUsername] = useState(''); // DRF obtain_auth_token expects 'username'
@@ -31,6 +32,13 @@ export default function LoginScreen({ navigation }) {
                 });
 
                 const p = profileRes.data;
+
+                // Persiste userId para uso em sessões futuras (RevenueCat + startup)
+                if (p.id) {
+                    await AsyncStorage.setItem('userId', String(p.id));
+                    configurePurchases(p.id).catch(() => {});
+                }
+
                 const isComplete = p.nome && p.peso && p.telefone && p.data_nascimento;
 
                 if (!isComplete) {

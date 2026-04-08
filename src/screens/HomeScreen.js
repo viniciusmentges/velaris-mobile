@@ -1664,22 +1664,37 @@ export default function HomeScreen({ navigation }) {
         setFetchError(false);
         try {
             const token = await AsyncStorage.getItem('userToken');
-            const response = await api.get('/api/shoes/', {
-                headers: { Authorization: `Token ${token} ` }
-            });
-            const { shoes, insights: coachInsights, strava_connected, strava_last_sync, recent_activities, user_plan, new_activity_insight } = response.data;
+            if (!token) {
+                navigation.replace('Welcome');
+                return;
+            }
+            const authHeader = { Authorization: `Token ${token}` };
 
-            const profileRes = await api.get('/api/perfil/', {
-                headers: { Authorization: `Token ${token} ` }
-            });
+            const response = await api.get('/api/shoes/', { headers: authHeader });
+            const {
+                shoes,
+                insights: coachInsights,
+                strava_connected,
+                strava_last_sync,
+                recent_activities,
+                user_plan,
+                new_activity_insight,
+            } = response.data ?? {};
 
-            setShoes(shoes || []);
+            setShoes(shoes ?? []);
             setInsights(coachInsights || 'Bora correr hoje? Seus equipamentos estão prontos.');
-            setStravaConnected(strava_connected);
-            setLastSync(strava_last_sync);
-            setRecentActivities(recent_activities || []);
+            setStravaConnected(!!strava_connected);
+            setLastSync(strava_last_sync ?? null);
+            setRecentActivities(recent_activities ?? []);
             setUserPlan(user_plan || 'START');
-            setUserName(profileRes.data.nome || 'Atleta');
+
+            // Perfil em paralelo — falha silenciosa não quebra o dashboard
+            try {
+                const profileRes = await api.get('/api/perfil/', { headers: authHeader });
+                setUserName(profileRes.data?.nome || 'Atleta');
+            } catch {
+                setUserName('Atleta');
+            }
 
             if (new_activity_insight && !insightData) {
                 setInsightData(new_activity_insight);

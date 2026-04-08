@@ -56,3 +56,11 @@ export const updateExpoPushToken = async (expoPushToken) => {
     });
     return response.data;
 };
+
+export const ativarPremium = async () => {
+    const token = await AsyncStorage.getItem('userToken');
+    const response = await api.post('/api/perfil/ativar_premium/', {}, {
+        headers: { Authorization: `Token ${token}` }
+    });
+    return response.data;
+};
