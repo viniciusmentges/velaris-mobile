@@ -108,7 +108,7 @@ export default function ProfileScreen({ navigation }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#020617', paddingTop: Platform.OS === 'ios' ? 50 : 30 }}>
-            <ScrollView className="flex-1 p-6">
+            <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 120 }}>
                 <View className="items-center mb-8">
                     <View className="w-24 h-24 bg-blue-600 rounded-full items-center justify-center mb-4">
                         <Text className="text-white text-4xl font-bold">
