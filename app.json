@@ -20,7 +20,7 @@
       "buildNumber": "1",
       "supportsTablet": false,
       "infoPlist": {
-        "NSMotionUsageDescription": "O Velaris usa dados de movimento para calcular o desgaste dos seus tênis."
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

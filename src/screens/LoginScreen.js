@@ -136,7 +136,7 @@ export default function LoginScreen({ navigation }) {
                                 />
                             </View>
 
-                            <TouchableOpacity style={{ alignItems: 'flex-end' }}>
+                            <TouchableOpacity style={{ alignItems: 'flex-end' }} onPress={() => navigation.navigate('ForgotPassword')}>
                                 <Text style={{ color: '#4D9EFF', fontSize: 13, fontFamily: 'Inter_500Medium' }}>Esqueceu a senha?</Text>
                             </TouchableOpacity>
 

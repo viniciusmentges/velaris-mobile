@@ -13,6 +13,7 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import PlansScreen from './src/screens/PlansScreen';
 import LibraryScreen from './src/screens/LibraryScreen';
 import ActivityFeedbackScreen from './src/screens/ActivityFeedbackScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 
 import {
   useFonts,
@@ -24,6 +25,7 @@ import {
 } from '@expo-google-fonts/inter';
 import {
   SpaceGrotesk_500Medium,
+  
   SpaceGrotesk_700Bold
 } from '@expo-google-fonts/space-grotesk';
 import {
@@ -109,6 +111,7 @@ export default function App() {
     else if (currentRoute === 'Plans') navigate('Home');
     else if (currentRoute === 'Profile') navigate('Home');
     else if (currentRoute === 'Library') navigate('Home');
+    else if (currentRoute === 'ForgotPassword') navigate('Login');
     else if (currentRoute === 'Home') navigate('Welcome');
     else navigate('Welcome');
   };
@@ -128,16 +131,17 @@ export default function App() {
   const renderScreen = () => {
     const nav = { navigate, replace: navigate, goBack };
     switch (currentRoute) {
-      case 'Login':              return <LoginScreen navigation={nav} />;
-      case 'Home':               return <HomeScreen navigation={nav} />;
-      case 'Profile':            return <ProfileScreen navigation={nav} />;
-      case 'Library':            return <LibraryScreen navigation={nav} />;
-      case 'AddShoe':            return <AddShoeScreen navigation={nav} />;
-      case 'Register':           return <RegisterScreen navigation={nav} />;
-      case 'Onboarding':         return <OnboardingScreen navigation={nav} />;
-      case 'Plans':              return <PlansScreen navigation={nav} />;
-      case 'ActivityFeedback':   return <ActivityFeedbackScreen navigation={nav} route={{ params: routeParams }} />;
-      default:                   return <WelcomeScreen navigation={nav} />;
+      case 'Login':            return <LoginScreen navigation={nav} />;
+      case 'Home':             return <HomeScreen navigation={nav} />;
+      case 'Profile':          return <ProfileScreen navigation={nav} />;
+      case 'Library':          return <LibraryScreen navigation={nav} />;
+      case 'AddShoe':          return <AddShoeScreen navigation={nav} />;
+      case 'Register':         return <RegisterScreen navigation={nav} />;
+      case 'Onboarding':       return <OnboardingScreen navigation={nav} />;
+      case 'Plans':            return <PlansScreen navigation={nav} />;
+      case 'ActivityFeedback': return <ActivityFeedbackScreen navigation={nav} route={{ params: routeParams }} />;
+      case 'ForgotPassword':   return <ForgotPasswordScreen navigation={nav} />;
+      default:                 return <WelcomeScreen navigation={nav} />;
     }
   };
 

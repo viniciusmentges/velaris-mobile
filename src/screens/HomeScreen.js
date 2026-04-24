@@ -179,7 +179,7 @@ const statusS = StyleSheet.create({
         fontSize: 12,
     },
     chipText: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white70,
         letterSpacing: 0.2,
@@ -286,7 +286,7 @@ function HeroShoeCardV2({ shoe, onTogglePause, isPaused }) {
                         </Text>
                     </View>
                     {!isStartPlan && !isReady && shoe.descanso_info?.horas > 0 && (
-                        <Text style={{ fontFamily: 'SpacesGrotesk_700Bold', fontSize: 10, color: C.yellow, opacity: 0.8 }}>
+                        <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 10, color: C.yellow, opacity: 0.8 }}>
                             {shoe.descanso_info?.horas}h restantes
                         </Text>
                     )}
@@ -360,7 +360,7 @@ const heroS = StyleSheet.create({
         letterSpacing: 1.2,
     },
     pauseText: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 13,
         color: C.white40,
     },
@@ -378,7 +378,7 @@ const heroS = StyleSheet.create({
         lineHeight: 28,
     },
     subtitle: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white40,
     },
@@ -393,7 +393,7 @@ const heroS = StyleSheet.create({
         paddingVertical: 2,
     },
     kmDetailLabel: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 10,
         color: C.white40,
         letterSpacing: 1.2,
@@ -422,12 +422,12 @@ const heroS = StyleSheet.create({
         justifyContent: 'space-between',
     },
     lifeLeft: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 12,
         letterSpacing: 0.2,
     },
     lifeKmLeft: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white40,
     },
@@ -461,7 +461,7 @@ const heroS = StyleSheet.create({
         letterSpacing: -0.5,
     },
     structuralDesc: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white40,
         lineHeight: 15,
@@ -479,7 +479,7 @@ const heroS = StyleSheet.create({
     },
     dot: { width: 8, height: 8, borderRadius: 999 },
     recoveryText: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 13,
         letterSpacing: 0.2,
     },
@@ -503,12 +503,12 @@ const heroS = StyleSheet.create({
         marginBottom: 4,
     },
     perceptionValue: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 14,
         color: C.white,
     },
     perceptionInsight: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.accent,
         fontStyle: 'italic',
@@ -737,7 +737,7 @@ const actS = StyleSheet.create({
         alignItems: 'center',
     },
     month: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 10,
         color: C.white40,
         letterSpacing: 1,
@@ -756,7 +756,7 @@ const actS = StyleSheet.create({
         color: C.white,
     },
     name: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white40,
     },
@@ -781,12 +781,12 @@ const actS = StyleSheet.create({
         justifyContent: 'space-between',
     },
     expandLabel: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white40,
     },
     expandValue: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 12,
         color: C.white70,
     },
@@ -839,7 +839,7 @@ const actS = StyleSheet.create({
         borderRadius: 6,
     },
     insightFactor: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white70,
     },
@@ -849,7 +849,7 @@ const actS = StyleSheet.create({
         color: C.white,
     },
     insightsEmpty: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white40,
         fontStyle: 'italic',
@@ -860,7 +860,7 @@ const actS = StyleSheet.create({
         gap: 8,
     },
     feedbackLabel: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 11,
         color: C.white40,
     },
@@ -921,13 +921,13 @@ const actS = StyleSheet.create({
         borderColor: C.accent,
     },
     tagText: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 11,
         color: C.white40,
     },
     tagTextActive: {
         color: C.accent,
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
     },
     tempDisplayRow: {
         flexDirection: 'row',
@@ -941,7 +941,7 @@ const actS = StyleSheet.create({
         color: C.white,
     },
     tempSource: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 11,
         color: C.white40,
     },
@@ -992,7 +992,7 @@ const actS = StyleSheet.create({
         letterSpacing: -0.5,
     },
     structuralDesc: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 10,
         color: C.white40,
         fontStyle: 'italic',
@@ -1070,7 +1070,7 @@ function ShoeCardV2({ shoe, onActivate, onNFC, onDelete }) {
                         </Text>
                     </View>
                     {!isStartPlan && !isReady && shoe.descanso_info?.horas > 0 && (
-                        <Text style={{ fontFamily: 'SpacesGrotesk_700Bold', fontSize: 9, color: C.yellow, opacity: 0.8 }}>
+                        <Text style={{ fontFamily: 'SpaceGrotesk_700Bold', fontSize: 9, color: C.yellow, opacity: 0.8 }}>
                             {shoe.descanso_info?.horas}h restantes
                         </Text>
                     )}
@@ -1171,7 +1171,7 @@ const cardS = StyleSheet.create({
         textTransform: 'capitalize',
     },
     subtitle: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white40,
     },
@@ -1191,7 +1191,7 @@ const cardS = StyleSheet.create({
         alignItems: 'center',
     },
     kmDetailLabel: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 9,
         color: C.white40,
         letterSpacing: 1,
@@ -1210,7 +1210,7 @@ const cardS = StyleSheet.create({
     },
     fill: { height: '100%', borderRadius: 999 },
     lifeDetail: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
     },
     structuralSection: {
@@ -1243,7 +1243,7 @@ const cardS = StyleSheet.create({
         letterSpacing: -0.4,
     },
     structuralDesc: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 10,
         color: C.white40,
         lineHeight: 14,
@@ -1263,7 +1263,7 @@ const cardS = StyleSheet.create({
     },
     dot: { width: 7, height: 7, borderRadius: 999 },
     recoveryText: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 12,
         letterSpacing: 0.1,
     },
@@ -1319,7 +1319,7 @@ const cardS = StyleSheet.create({
         marginBottom: 2,
     },
     perceptionValue: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 12,
         color: C.white,
     },
@@ -1361,7 +1361,7 @@ const menuS = StyleSheet.create({
         textAlign: 'center',
     },
     itemText: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 15,
         color: C.white70,
     },
@@ -1423,12 +1423,12 @@ const stravaS = StyleSheet.create({
     },
     iconText: { fontSize: 17, fontWeight: '700' },
     title: {
-        fontFamily: 'DM_Sans_700Bold',
+        fontFamily: 'DMSans_700Bold',
         fontSize: 13,
         color: C.white,
     },
     sync: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white40,
         marginTop: 1,
@@ -1546,7 +1546,7 @@ const coachS = StyleSheet.create({
         letterSpacing: 1.4,
     },
     sublabel: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white40,
     },
@@ -1566,14 +1566,14 @@ const coachS = StyleSheet.create({
     },
     divider: { height: 1, backgroundColor: C.border },
     message: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 13,
         color: C.white70,
         lineHeight: 20,
         fontStyle: 'italic',
     },
     toggle: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 12,
         color: C.accent,
         letterSpacing: 0.3,
@@ -1722,7 +1722,6 @@ export default function HomeScreen({ navigation }) {
             try {
                 const projectId = '433e1ef0-0362-49bc-bd74-7808a3e3fa10';
                 const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({ projectId });
-                console.log('[Push] EXPO TOKEN:', expoPushToken);
                 await updateExpoPushToken(expoPushToken);
                 console.log('[Push] Token salvo no backend com sucesso');
             } catch (e) {
@@ -2178,7 +2177,7 @@ const s = StyleSheet.create({
         paddingBottom: 16,
     },
     greeting: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 13,
         color: C.white40,
         marginBottom: 2,
@@ -2218,7 +2217,7 @@ const s = StyleSheet.create({
         textTransform: 'uppercase',
     },
     sectionAction: {
-        fontFamily: 'DM_Sans_500Medium',
+        fontFamily: 'DMSans_500Medium',
         fontSize: 13,
         color: C.accent,
     },
@@ -2234,7 +2233,7 @@ const s = StyleSheet.create({
         marginBottom: 16,
     },
     emptyText: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         color: C.white40,
         fontSize: 13,
     },
@@ -2292,7 +2291,7 @@ const s = StyleSheet.create({
         marginBottom: 2,
     },
     premiumCtaDesc: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 11,
         color: C.white70,
     },
@@ -2372,7 +2371,7 @@ const modalS = StyleSheet.create({
         marginBottom: 20,
     },
     insightText: {
-        fontFamily: 'DM_Sans_400Regular',
+        fontFamily: 'DMSans_400Regular',
         fontSize: 15,
         color: C.white70,
         textAlign: 'center',

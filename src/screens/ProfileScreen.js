@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Switch, Alert, TextInput } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Platform, ScrollView, ActivityIndicator, Switch, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
@@ -19,7 +19,7 @@ export default function ProfileScreen({ navigation }) {
     const dateToDB = (brDate) => {
         if (!brDate) return null;
         const parts = brDate.split('/');
-        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
         return brDate;
     };
 
@@ -75,30 +75,25 @@ export default function ProfileScreen({ navigation }) {
     async function handleDeleteAccount() {
         Alert.alert(
             'Excluir conta',
-            'Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita. Todos os seus dados serão removidos permanentemente.',
+            'Essa ação é permanente e irá apagar todos os seus dados, tênis e histórico de corridas. Não é possível desfazer.',
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
                     text: 'Excluir permanentemente',
                     style: 'destructive',
                     onPress: async () => {
-                        setLoading(true);
                         try {
                             const token = await AsyncStorage.getItem('userToken');
                             await api.delete('/api/perfil/delete_account/', {
-                                headers: { Authorization: `Token ${token}` },
+                                headers: { Authorization: `Token ${token}` }
                             });
                             await AsyncStorage.removeItem('userToken');
                             navigation.replace('Welcome');
                         } catch (err) {
-                            setLoading(false);
-                            Alert.alert(
-                                'Erro',
-                                'Não foi possível excluir sua conta. Tente novamente ou entre em contato: suporte@velarisapp.com.br'
-                            );
+                            Alert.alert('Erro', 'Não foi possível excluir a conta. Tente novamente ou entre em contato com o suporte.');
                         }
-                    },
-                },
+                    }
+                }
             ]
         );
     }
@@ -230,17 +225,16 @@ export default function ProfileScreen({ navigation }) {
                     onPress={handleDeleteAccount}
                     style={{ padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 40 }}
                 >
-                    <Text style={{ color: '#64748b', fontSize: 13 }}>Excluir minha conta permanentemente</Text>
+                    <Text style={{ color: '#475569', fontSize: 13 }}>Excluir minha conta</Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     );
 }
 
-
 function ProfileItem({ label, value, isEditing, onChange, keyboardType = 'default', placeholder }) {
     return (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', py: 12, borderBottomWidth: 1, borderBottomColor: '#1e293b', paddingVertical: 12 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: '#1e293b', paddingVertical: 12 }}>
             <Text style={{ color: '#94a3b8' }}>{label}</Text>
             {isEditing ? (
                 <TextInput
