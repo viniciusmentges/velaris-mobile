@@ -92,6 +92,23 @@ export default function App() {
     }
   }, [fontError]);
 
+  // Listener de toque em push notification — deve ficar ANTES do early return (Rules of Hooks)
+  React.useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      try {
+        const data = response?.notification?.request?.content?.data ?? {};
+        console.log('[Push] Notificação tocada:', data);
+        if (data.route === 'activity_feedback' && data.activity_id) {
+          setRouteParams({ activityId: data.activity_id });
+          setCurrentRoute('ActivityFeedback');
+        }
+      } catch (e) {
+        console.error('[Push] Erro ao processar notificação:', e?.message);
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   if ((!fontsLoaded && !fontError && !timedOut) || currentRoute === 'Loading') {
     return (
       <View style={{ flex: 1, backgroundColor: '#080C14', alignItems: 'center', justifyContent: 'center' }}>
@@ -115,18 +132,6 @@ export default function App() {
     else if (currentRoute === 'Home') navigate('Welcome');
     else navigate('Welcome');
   };
-
-  // Listener de toque em push notification — intercepta qualquer resposta
-  React.useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      const data = response.notification.request.content.data ?? {};
-      console.log('[Push] Notificação tocada:', data);
-      if (data.route === 'activity_feedback' && data.activity_id) {
-        navigate('ActivityFeedback', { activityId: data.activity_id });
-      }
-    });
-    return () => subscription.remove();
-  }, []);
 
   const renderScreen = () => {
     const nav = { navigate, replace: navigate, goBack };
