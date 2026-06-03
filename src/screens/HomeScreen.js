@@ -1619,7 +1619,7 @@ export default function HomeScreen({ navigation }) {
     // Deep Linking Listener para NFC
     const url = Linking.useURL();
 
-    const redirectUri = makeRedirectUri({ scheme: 'velaris', path: 'strava' });
+    const redirectUri = makeRedirectUri({ scheme: 'velaris', path: 'localhost' });
     console.log('[AuthSession] Redirect URI:', redirectUri);
 
     const [request, responseAuth, promptAsync] = useAuthRequest(
