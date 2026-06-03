@@ -2073,11 +2073,27 @@ export default function HomeScreen({ navigation }) {
                 <StravaCardV2
                     lastSync={formatDateCompact(lastSync)}
                     onSync={() => {
-                        if (stravaConnected) {
-                            handleStravaSync();
-                        } else {
-                            promptAsync();
-                        }
+                        // DEBUG TEMPORÁRIO — confirmar que o botão está sendo acionado
+                        console.log('STRAVA BUTTON PRESSED');
+                        Alert.alert('DEBUG', 'Botão Strava acionado', [
+                            { text: 'OK', onPress: () => {
+                                if (stravaConnected) {
+                                    handleStravaSync();
+                                } else {
+                                    // DEBUG TEMPORÁRIO — confirmar redirect_uri em produção
+                                    const debugMsg = [
+                                        `Platform: ${Platform.OS}`,
+                                        `redirectUri: ${redirectUri}`,
+                                        `request.url: ${request?.url ?? '(ainda não disponível)'}`,
+                                    ].join('\n\n');
+                                    console.log('[STRAVA DEBUG]', debugMsg);
+                                    Alert.alert('DEBUG — Strava OAuth', debugMsg, [
+                                        { text: 'Cancelar', style: 'cancel' },
+                                        { text: 'Abrir Strava', onPress: () => promptAsync() },
+                                    ]);
+                                }
+                            }},
+                        ]);
                     }}
                     onDisconnect={handleStravaDisconnect}
                     connected={stravaConnected}
