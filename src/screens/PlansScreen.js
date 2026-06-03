@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
     Platform, SafeAreaView, ActivityIndicator, Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getOfferings, purchasePackage, restorePurchases, getCustomerInfo, hasPremium } from '../services/purchases';
+import { initRevenueCat } from '../services/revenuecat';
 import { ativarPremium } from '../services/api';
 
 const C = {
@@ -25,21 +27,31 @@ export default function PlansScreen({ navigation }) {
     const [purchasing, setPurchasing]     = useState(false);
     const [restoring, setRestoring]       = useState(false);
     const [isPremium, setIsPremium]       = useState(false);
+    const [error, setError]               = useState(null);
 
-    useEffect(() => {
-        (async () => {
-            // Verifica status atual do usuário
+    const loadOfferings = useCallback(async () => {
+        setLoadingOffer(true);
+        setError(null);
+        try {
+            const userId = await AsyncStorage.getItem('userId');
+            await initRevenueCat(userId || undefined);
+
             const info = await getCustomerInfo();
-            if (hasPremium(info)) {
-                setIsPremium(true);
-            }
+            if (hasPremium(info)) setIsPremium(true);
 
-            // Carrega offerings
             const current = await getOfferings();
+            if (!current) throw new Error('Nenhum offering disponível no momento');
+
             setOffering(current);
+        } catch (e) {
+            console.log('[RC] PlansScreen load error:', e.message);
+            setError('Não foi possível carregar os planos.');
+        } finally {
             setLoadingOffer(false);
-        })();
+        }
     }, []);
+
+    useEffect(() => { loadOfferings(); }, [loadOfferings]);
 
     const handleSubscribe = async () => {
         if (!offering) {
@@ -139,7 +151,9 @@ export default function PlansScreen({ navigation }) {
                             <Text style={[s.planName, { color: C.accent }]}>PREMIUM</Text>
                             {loadingOffer
                                 ? <ActivityIndicator size="small" color={C.accent} style={{ marginTop: 4 }} />
-                                : <Text style={s.planPrice}>{priceString}</Text>
+                                : error
+                                    ? <Text style={[s.planPrice, { fontSize: 12, color: 'rgba(255,80,80,0.85)' }]}>{error}</Text>
+                                    : <Text style={s.planPrice}>{priceString}</Text>
                             }
                         </View>
                         <Text style={s.icon}>🚀</Text>
@@ -157,6 +171,15 @@ export default function PlansScreen({ navigation }) {
                         <View style={s.activeBadge}>
                             <Text style={s.activeBadgeText}>✓ Plano Premium ativo</Text>
                         </View>
+                    ) : error ? (
+                        <TouchableOpacity
+                            style={[s.subscribeBtn, { backgroundColor: 'rgba(77,158,255,0.15)', borderWidth: 1, borderColor: C.borderAccent }]}
+                            activeOpacity={0.8}
+                            onPress={loadOfferings}
+                            disabled={loadingOffer}
+                        >
+                            <Text style={[s.subscribeText, { color: C.accent }]}>Tentar novamente</Text>
+                        </TouchableOpacity>
                     ) : (
                         <TouchableOpacity
                             style={[s.subscribeBtn, (purchasing || loadingOffer) && s.subscribeBtnDisabled]}

@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 16.0.0"
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -15,6 +16,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "channel": "production",
       "android": {
         "buildType": "app-bundle"
       },
@@ -29,11 +31,7 @@
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "internal"
       },
-      "ios": {
-        "appleId": "SEU_APPLE_ID@email.com",
-        "ascAppId": "SEU_APP_ID_NO_APP_STORE_CONNECT",
-        "appleTeamId": "SEU_TEAM_ID"
-      }
+      "ios": {}
     }
   }
 }
