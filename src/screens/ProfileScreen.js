@@ -214,6 +214,15 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                 </View>
 
+                {/* Entrar em Assessoria */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('JoinOrg')}
+                    style={{ backgroundColor: 'rgba(77,158,255,0.08)', borderWidth: 1, borderColor: 'rgba(77,158,255,0.2)', padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
+                >
+                    <Text style={{ color: '#4D9EFF', fontWeight: 'bold', fontSize: 14 }}>Entrar em uma Assessoria</Text>
+                    <Text style={{ color: '#64748b', fontSize: 12, marginTop: 2 }}>Conecte-se à sua assessoria de corrida</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     onPress={handleLogout}
                     className="bg-red-900/20 border border-red-900/40 p-4 rounded-xl items-center mb-4"

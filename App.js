@@ -14,6 +14,7 @@ import PlansScreen from './src/screens/PlansScreen';
 import LibraryScreen from './src/screens/LibraryScreen';
 import ActivityFeedbackScreen from './src/screens/ActivityFeedbackScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import JoinOrgScreen from './src/screens/JoinOrgScreen';
 
 import {
   useFonts,
@@ -129,6 +130,7 @@ export default function App() {
     else if (currentRoute === 'Profile') navigate('Home');
     else if (currentRoute === 'Library') navigate('Home');
     else if (currentRoute === 'ForgotPassword') navigate('Login');
+    else if (currentRoute === 'JoinOrg') navigate('Profile');
     else if (currentRoute === 'Home') navigate('Welcome');
     else navigate('Welcome');
   };
@@ -146,6 +148,7 @@ export default function App() {
       case 'Plans':            return <PlansScreen navigation={nav} />;
       case 'ActivityFeedback': return <ActivityFeedbackScreen navigation={nav} route={{ params: routeParams }} />;
       case 'ForgotPassword':   return <ForgotPasswordScreen navigation={nav} />;
+      case 'JoinOrg':          return <JoinOrgScreen navigation={nav} />;
       default:                 return <WelcomeScreen navigation={nav} />;
     }
   };

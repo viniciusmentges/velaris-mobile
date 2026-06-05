@@ -64,3 +64,18 @@ export const ativarPremium = async () => {
     });
     return response.data;
 };
+
+export const previewInvite = async (inviteToken) => {
+    const response = await api.get(`/api/b2b/invites/${inviteToken}/`);
+    return response.data;
+};
+
+export const acceptInvite = async (inviteToken) => {
+    const userToken = await AsyncStorage.getItem('userToken');
+    const response = await api.post(
+        `/api/b2b/invites/${inviteToken}/accept/`,
+        { consent_accepted: true },
+        { headers: { Authorization: `Token ${userToken}` } }
+    );
+    return response.data;
+};
